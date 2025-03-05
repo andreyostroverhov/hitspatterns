@@ -45,6 +45,10 @@
 		<ProjectReference Include="..\Account.BL\Account.BL.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="logs\" />
+	</ItemGroup>
+
 
 
 </Project>

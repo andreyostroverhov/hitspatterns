@@ -1,0 +1,14 @@
+version: '3'
+services:
+
+  patterns-account-api:
+    build:
+      context: .
+      dockerfile: Account.API/Dockerfile
+    ports:
+      - "11010:8080"
+      - "11011:8081"
+    restart: always
+    user: "1001"
+    volumes:
+      - /var/log/patterns/account:/app/logs
