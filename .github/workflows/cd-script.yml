@@ -45,11 +45,11 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" \
+          rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
             --archive --compress --delete --progress --verbose \
             publish/ ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }}:${{ env.SERVER_PATH }}
 
       - name: Restart Application
         run: |
-          ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no \
+          ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no \
           ${{ env.SERVER_USER }}@${{ env.SERVER_HOST }} "sudo systemctl restart my-dotnet-app"
