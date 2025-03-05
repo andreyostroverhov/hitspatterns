@@ -40,7 +40,7 @@ jobs:
         run: |
           set -eu
           mkdir -p "$HOME/.ssh"
-          echo "${{ secrets.SSH_KEY }}" > "$HOME/.ssh/key"
+          echo "${{ secrets.SSH_KEY }}" > "$HOME/.ssh/id_rsa"
           chmod 600 "$HOME/.ssh/key"
 
       - name: Deploy to Server
