@@ -2,8 +2,7 @@ using Common.DataTransferObjects;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
+
 
 namespace Loan.API.Controllers;
 
@@ -25,11 +24,11 @@ public class LoanClientController : ControllerBase
         _loanClientService = loanClientService;
     }
 
+
     /// <summary>
     /// Get new loan (Взять кредит)
     /// </summary>
-    /// <param name="request">Данные для создания кредита</param>
-    /// <returns>Информация о созданном кредите</returns>
+    /// <returns></returns>
     [HttpPost("take-new")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public async Task<ActionResult<LoanDto>> GetNewLoan([FromBody] TakeLoanRequest request)
@@ -38,11 +37,11 @@ public class LoanClientController : ControllerBase
         return Ok(loan);
     }
 
+
     /// <summary>
     /// Repay loan (Погасить кредит полностью или частично)
     /// </summary>
-    /// <param name="request">Данные для погашения кредита</param>
-    /// <returns>Информация о погашении</returns>
+    /// <returns></returns>
     [HttpPost("repay")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public async Task<ActionResult<RepayLoanResponse>> RepayLoan([FromBody] RepayLoanRequest request)
