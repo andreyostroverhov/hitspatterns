@@ -163,9 +163,9 @@ public class AuthService : IAuthService
 
         return new TokenResponseDto()
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
-            RefreshToken = device.RefreshToken,
-            UserId = user.Id.ToString(),
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+            refreshToken = device.RefreshToken,
+            userId = user.Id.ToString(),
         };
     }
 
@@ -245,9 +245,9 @@ public class AuthService : IAuthService
 
         return new TokenResponseDto()
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
-            RefreshToken = device.RefreshToken,
-            UserId = user.Id.ToString()
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+            refreshToken = device.RefreshToken,
+            userId = user.Id.ToString()
         };
     }
 

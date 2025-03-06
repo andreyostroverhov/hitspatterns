@@ -10,18 +10,18 @@ public class TokenResponseDto
     /// <summary>
     /// Access token
     /// </summary>
-    [DisplayName("access_token")]
-    public required string AccessToken { get; set; }
+    [DisplayName("accessToken")]
+    public required string accessToken { get; set; }
 
     /// <summary>
     /// Refresh token
     /// </summary>
-    [DisplayName("refresh_token")]
-    public required string RefreshToken { get; set; }
+    [DisplayName("refreshToken")]
+    public required string refreshToken { get; set; }
 
     /// <summary>
     /// User id
     /// </summary>
-    [DisplayName("User_id")]
-    public required string UserId { get; set; }
+    [DisplayName("userId")]
+    public required string userId { get; set; }
 }

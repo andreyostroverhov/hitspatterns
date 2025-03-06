@@ -56,7 +56,7 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    /// <summary> 
+/*    /// <summary> 
     /// Get user's metadata
     /// </summary>
     /// <returns></returns>
@@ -89,7 +89,7 @@ public class UserController : ControllerBase
 
         await _userService.UpdateUserMetadata(userId, newMetadata);
         return Ok();
-    }
+    }*/
 
 }
 

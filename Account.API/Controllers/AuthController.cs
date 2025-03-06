@@ -11,7 +11,7 @@ namespace Account.API.Controllers;
 /// Controller for register, authentication, changing the password
 /// </summary>
 [ApiController]
-[Route("api/auth")]
+[Route("/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -81,7 +81,7 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    /// <summary>
+/*    /// <summary>
     /// Get user devices
     /// </summary>
     /// <returns></returns>
@@ -135,6 +135,6 @@ public class AuthController : ControllerBase
 
         await _authService.DeleteDeviceAsync(userId, deviceId);
         return Ok();
-    }
+    }*/
 }
 
