@@ -25,7 +25,7 @@ public class LoanEmployeeController : ControllerBase
         _loanEmployeeService = loanEmployeeService;
     }
     /// <summary>
-    /// Get available tariffs (Получить список доступных тарифов)
+    /// Get available tariffs (Получить список всех тарифов)
     /// </summary>
     /// <returns></returns>
     [HttpGet]

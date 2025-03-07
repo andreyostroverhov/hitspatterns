@@ -22,6 +22,9 @@ public class Loan
     public decimal Amount { get; set; } // Сумма кредита
 
     [Required]
+    public Currency Currency { get; set; } // Валюта кредита
+
+    [Required]
     [Range(0, double.MaxValue)]
     public decimal RemainingAmount { get; set; } // Оставшаяся сумма к погашению
 

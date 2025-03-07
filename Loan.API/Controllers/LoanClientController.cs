@@ -1,5 +1,8 @@
 using Common.DataTransferObjects;
+using Common.Enums;
+using Common.Exceptions;
 using Common.Interfaces;
+using Loan.BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,22 +27,77 @@ public class LoanClientController : ControllerBase
         _loanClientService = loanClientService;
     }
 
+    /// <summary>
+    /// Get available tariffs for client (Получить список доступных тарифов) [Client]
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("tariff")]
+    public async Task<ActionResult<List<TariffDto>>> GetTariffList()
+    {
+        return Ok(await _loanClientService.GetAvailableTariffsForClient());
+    }
+
 
     /// <summary>
-    /// Get new loan (Взять кредит)
+    /// Get currencies (Получить список валют) [Client]
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("currencies")]
+    public async Task<ActionResult<IEnumerable<Currency>>> GetCurrenciesAsync()
+    {
+        // Имитация асинхронной операции (например, если в будущем потребуется обращение к БД)
+        var currencies = await Task.Run(() => Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList());
+        return Ok(currencies);
+    }
+
+    /// <summary>
+    /// Get clients loans (Получить список кредитов пользователя) [Client]
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("loans")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<ActionResult<List<LoanDto>>> GetLoansClient()
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid clientId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        return Ok(await _loanClientService.GetLoansClient(clientId));
+    }
+
+    /// <summary>
+    /// Get detailed information about loan (Получить детальную информацию о кредите) [Client]
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("loans/{loanId}")]
+    public async Task<ActionResult<LoanDetailsDto>> GetLoanDetailsClient(Guid loanId)
+    {
+        return Ok(await _loanClientService.GetLoanDetailsClient(loanId));
+    }
+
+    /// <summary>
+    /// Get new loan (Взять кредит) [Client]
     /// </summary>
     /// <returns></returns>
     [HttpPost("take-new")]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public async Task<ActionResult<LoanDto>> GetNewLoan([FromBody] TakeLoanRequest request)
     {
-        var loan = await _loanClientService.TakeLoanAsync(request);
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid clientId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        var loan = await _loanClientService.TakeLoanAsync(request, clientId);
         return Ok(loan);
     }
 
 
     /// <summary>
-    /// Repay loan (Погасить кредит полностью или частично)
+    /// Repay loan (Погасить кредит полностью или частично) [Client]
     /// </summary>
     /// <returns></returns>
     [HttpPost("repay")]
