@@ -28,7 +28,7 @@ public class LoanClientController : ControllerBase
     }
 
     /// <summary>
-    /// Get available tariffs for client (Получить список доступных тарифов) [Client]
+    /// Get available tariffs for client [Client]
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -40,7 +40,7 @@ public class LoanClientController : ControllerBase
 
 
     /// <summary>
-    /// Get currencies (Получить список валют) [Client]
+    /// Get currencies [Client]
     /// </summary>
     /// <returns></returns>
     [HttpGet("currencies")]
@@ -52,7 +52,7 @@ public class LoanClientController : ControllerBase
     }
 
     /// <summary>
-    /// Get clients loans (Получить список кредитов пользователя) [Client]
+    /// Get clients loans [Client]
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -69,7 +69,7 @@ public class LoanClientController : ControllerBase
     }
 
     /// <summary>
-    /// Get detailed information about loan (Получить детальную информацию о кредите) [Client]
+    /// Get detailed information about loan [Client]
     /// </summary>
     /// <returns></returns>
     [HttpGet("loans/{loanId}")]
@@ -79,7 +79,7 @@ public class LoanClientController : ControllerBase
     }
 
     /// <summary>
-    /// Get new loan (Взять кредит) [Client]
+    /// Get new loan [Client]
     /// </summary>
     /// <returns></returns>
     [HttpPost("take-new")]
@@ -97,7 +97,7 @@ public class LoanClientController : ControllerBase
 
 
     /// <summary>
-    /// Repay loan (Погасить кредит полностью или частично) [Client]
+    /// Repay loan [Client]
     /// </summary>
     /// <returns></returns>
     [HttpPost("repay")]

@@ -81,60 +81,85 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-/*    /// <summary>
-    /// Get user devices
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("devices")]
-    public async Task<ActionResult<List<DeviceDto>>> GetDevices()
-    {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-            throw new UnauthorizedException("User is not authorized");
-        }
-
-        return Ok(await _authService.GetDevicesAsync(userId));
-    }
 
     /// <summary>
-    /// Rename device
+    /// Ban user [Admin]
     /// </summary>
-    /// <param name="deviceId"></param>
-    /// <param name="deviceRenameDto"></param>
-    /// <returns></returns>
-    [HttpPut]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("devices/{deviceId}")]
-    public async Task<ActionResult> RenameDevice([FromRoute] Guid deviceId, [FromBody] DeviceRenameDto deviceRenameDto)
+    [HttpPost]
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = ApplicationRoleNames.Administrator)]
+    [Route("ban/{userId}")]
+    public async Task<ActionResult> BanUser(Guid userId)
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-            throw new UnauthorizedException("User is not authorized");
-        }
-
-        await _authService.RenameDeviceAsync(userId, deviceId, deviceRenameDto);
+        await _authService.BanUser(userId);
         return Ok();
     }
 
     /// <summary>
-    /// Delete device from user devices
+    /// Unban user [Admin]
     /// </summary>
-    /// <param name="deviceId"></param>
-    /// <returns></returns>
     [HttpDelete]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("devices/{deviceId}")]
-    public async Task<ActionResult> DeleteDevice([FromRoute] Guid deviceId)
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = ApplicationRoleNames.Administrator)]
+    [Route("unban/{userId}")]
+    public async Task<ActionResult> UnbanUser(Guid userId)
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        await _authService.UnbanUser(userId);
+        return Ok();
+    }
+
+    /*    /// <summary>
+        /// Get user devices
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Route("devices")]
+        public async Task<ActionResult<List<DeviceDto>>> GetDevices()
         {
-            throw new UnauthorizedException("User is not authorized");
+            if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+
+            return Ok(await _authService.GetDevicesAsync(userId));
         }
 
-        await _authService.DeleteDeviceAsync(userId, deviceId);
-        return Ok();
-    }*/
+        /// <summary>
+        /// Rename device
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <param name="deviceRenameDto"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Route("devices/{deviceId}")]
+        public async Task<ActionResult> RenameDevice([FromRoute] Guid deviceId, [FromBody] DeviceRenameDto deviceRenameDto)
+        {
+            if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+
+            await _authService.RenameDeviceAsync(userId, deviceId, deviceRenameDto);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Delete device from user devices
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Route("devices/{deviceId}")]
+        public async Task<ActionResult> DeleteDevice([FromRoute] Guid deviceId)
+        {
+            if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+
+            await _authService.DeleteDeviceAsync(userId, deviceId);
+            return Ok();
+        }*/
 }
 
