@@ -1,6 +1,8 @@
 using Common.DataTransferObjects;
+using Common.Enums;
 using Common.Exceptions;
 using Common.Interfaces;
+using Common.Other;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,40 +58,51 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-/*    /// <summary> 
-    /// Get user's metadata
+    /// <summary>
+    /// Get users list [Admin]
     /// </summary>
-    /// <returns></returns>
     [HttpGet]
-    [Route("metadata")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public async Task<ActionResult<string>> GetUserMetadata()
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = ApplicationRoleNames.Administrator)]
+    [Route("users/list")]
+    public async Task<ActionResult<List<UserShortDto>>> GetUsers()
     {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
-        {
-            throw new UnauthorizedException("User is not authorized");
-        }
-
-        return Ok(await _userService.GetUserMetadata(userId));
+        return Ok(await _userService.GetUsers());
     }
 
-    /// <summary> 
-    /// Update user's metadata
-    /// </summary>
-    /// <returns></returns>
-    [HttpPut]
-    [Route("metadata")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public async Task<ActionResult> UpdateUserMetadata([FromBody] string newMetadata)
-    {
-        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+    /*    /// <summary> 
+        /// Get user's metadata
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("metadata")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult<string>> GetUserMetadata()
         {
-            throw new UnauthorizedException("User is not authorized");
+            if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+
+            return Ok(await _userService.GetUserMetadata(userId));
         }
 
-        await _userService.UpdateUserMetadata(userId, newMetadata);
-        return Ok();
-    }*/
+        /// <summary> 
+        /// Update user's metadata
+        /// </summary>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("metadata")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ActionResult> UpdateUserMetadata([FromBody] string newMetadata)
+        {
+            if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+
+            await _userService.UpdateUserMetadata(userId, newMetadata);
+            return Ok();
+        }*/
 
 }
 

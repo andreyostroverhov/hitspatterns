@@ -1,8 +1,10 @@
 ﻿using Account.DAL.Data;
 using Account.DAL.Data.Entities;
 using Common.DataTransferObjects;
+using Common.Enums;
 using Common.Exceptions;
 using Common.Interfaces;
+using Common.Other;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -89,6 +91,29 @@ public class UserService : IUserService
         user.Metadata = newMetadata;
         _accountDbContext.UpdateRange(user);
         await _accountDbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<UserShortDto>> GetUsers()
+    {
+        var users1 = _userManager.Users
+            .AsNoTracking();
+
+
+        var shortUsers = users1.Select(user => new UserShortDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email!,
+            Role = user.Roles.Any(r => r.Role.RoleType == RoleType.Administrator)
+                ? ApplicationRoleNames.Administrator
+                : user.Roles.Any(r => r.Role.RoleType == RoleType.Employee)
+                    ? ApplicationRoleNames.Employee
+                    : user.Roles.Any(r => r.Role.RoleType == RoleType.DefaultUser)
+                        ? ApplicationRoleNames.DefaultUser
+                        : null
+        }).ToList();
+
+        return shortUsers;
     }
 }
 

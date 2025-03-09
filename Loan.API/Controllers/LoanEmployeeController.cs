@@ -51,10 +51,10 @@ public class LoanEmployeeController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpDelete]
-    [Route("tariff")]
-    public async Task<ActionResult> DeleteTariff([FromBody] DeleteTariffRequest request)
+    [Route("tariff/{tarrifIf}")]
+    public async Task<ActionResult> DeleteTariff([FromQuery] Guid tarrifIf)
     {
-        await _loanEmployeeService.DeleteTariffAsync(request.Id);
+        await _loanEmployeeService.DeleteTariffAsync(tarrifIf);
         return Ok(new { message = "Тариф успешно удален." });
     }
 
