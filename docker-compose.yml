@@ -11,6 +11,17 @@ services:
     volumes:
       - /var/log/patterns/loan:/app/logs
 
+  patterns-core-api:
+    build:
+      context: .
+      dockerfile: Core.API/Dockerfile
+    ports:
+      - "9010:8080"
+    restart: always
+    user: "1001"
+    volumes:
+      - /var/log/patterns/core:/app/logs
+
   patterns-account-api:
     build:
       context: .
