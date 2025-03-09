@@ -163,9 +163,9 @@ public class AuthService : IAuthService
 
         return new TokenResponseDto()
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
-            RefreshToken = device.RefreshToken,
-            UserId = user.Id.ToString(),
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+            refreshToken = device.RefreshToken,
+            userId = user.Id.ToString(),
         };
     }
 
@@ -245,9 +245,9 @@ public class AuthService : IAuthService
 
         return new TokenResponseDto()
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
-            RefreshToken = device.RefreshToken,
-            UserId = user.Id.ToString()
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+            refreshToken = device.RefreshToken,
+            userId = user.Id.ToString()
         };
     }
 
@@ -396,6 +396,37 @@ public class AuthService : IAuthService
         }
 
         return new ClaimsIdentity(claims, "Token", ClaimTypes.Name, ClaimTypes.Role);
+    }
+
+    public async Task BanUser(Guid userId)
+    {
+        var userM = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException("User with this Id not found.");
+
+        if (userM.LockoutEnabled)
+        {
+            DateTimeOffset lockoutDate = new DateTimeOffset(DateTime.UtcNow.AddYears(50));
+            await _userManager.SetLockoutEndDateAsync(userM, lockoutDate);
+            await _userManager.UpdateAsync(userM);
+        }
+        else
+        {
+            throw new BadRequestException("User cannot be blocked.");
+        }
+    }
+
+    public async Task UnbanUser(Guid userId)
+    {
+        var userM = await _userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException("User with this Id not found.");
+
+        if (userM.LockoutEnabled)
+        {
+            await _userManager.SetLockoutEndDateAsync(userM, null);
+            await _userManager.UpdateAsync(userM);
+        }
+        else
+        {
+            throw new BadRequestException("User cannot be unblocked.");
+        }
     }
 }
 

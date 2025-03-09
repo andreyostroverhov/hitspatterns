@@ -2,7 +2,7 @@
 
 # Этот этап используется при запуске из VS в быстром режиме (по умолчанию для конфигурации отладки)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
+USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -13,9 +13,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Account.API/Account.API.csproj", "Account.API/"]
-COPY ["Common/Common.csproj", "Common/"]
-COPY ["Account.BL/Account.BL.csproj", "Account.BL/"]
-COPY ["Account.DAL/Account.DAL.csproj", "Account.DAL/"]
 RUN dotnet restore "./Account.API/Account.API.csproj"
 COPY . .
 WORKDIR "/src/Account.API"

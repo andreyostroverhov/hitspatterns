@@ -20,7 +20,7 @@ public class AccountLoginDto
     /// User password
     /// </summary>
     [Required]
-    [DefaultValue("P@ssw0rd")]
+ //   [DefaultValue("P@ssw0rd")]
     [DisplayName("password")]
     public required string Password { get; set; }
 }

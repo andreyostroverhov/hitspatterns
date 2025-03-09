@@ -1,0 +1,30 @@
+name: GitHub Actions CI
+
+on:
+  pull_request:
+    branches: [master]
+
+env:
+  DOTNET_VERSION: '8.0'
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore
+
+      - name: Build .NET Project
+        run: dotnet build --no-restore --configuration Release

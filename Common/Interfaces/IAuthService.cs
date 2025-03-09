@@ -14,6 +14,8 @@ public interface IAuthService
     Task DeleteDeviceAsync(Guid userId, Guid deviceId);
     Task ChangePasswordAsync(Guid userId, ChangePasswordDto changePasswordDto);
     Task ResetPasswordAsync(ResetPasswordDto model);
+    Task UnbanUser(Guid userId);
+    Task BanUser(Guid userId);
 
 }
 

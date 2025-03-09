@@ -14,6 +14,12 @@ public enum RoleType
     Administrator,
 
     /// <summary>
+    /// Employee role
+    /// </summary>
+    [Display(Name = ApplicationRoleNames.Employee)]
+    Employee,
+
+    /// <summary>
     /// Default user role
     /// </summary>
     [Display(Name = ApplicationRoleNames.DefaultUser)]
@@ -29,6 +35,11 @@ public class ApplicationRoleNames
     /// Administrator role name
     /// </summary>
     public const string Administrator = "Administrator";
+
+    /// <summary>
+    /// Employee role name
+    /// </summary>
+    public const string Employee = "Employee";
 
     /// <summary>
     /// Default user role name

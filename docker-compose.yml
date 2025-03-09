@@ -1,0 +1,24 @@
+version: '3'
+services:
+  patterns-loan-api:
+    build:
+      context: .
+      dockerfile: Loan.API/Dockerfile
+    ports:
+      - "10010:8080"
+    restart: always
+    user: "1001"
+    volumes:
+      - /var/log/patterns/loan:/app/logs
+
+  patterns-account-api:
+    build:
+      context: .
+      dockerfile: Account.API/Dockerfile
+    ports:
+      - "11010:8080"
+    restart: always
+    user: "1001"
+    volumes:
+      - /var/log/patterns/account:/app/logs
+
