@@ -1,0 +1,70 @@
+name: Docker Compose CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Запуск при пуше в main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v4
+
+      - name: Логин в GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Собрать и отправить образы
+        run: |
+          docker build -t ghcr.io/${{ github.actor }}/patterns-loan-api:latest -f Loan.API/Dockerfile .
+          docker push ghcr.io/${{ github.actor }}/patterns-loan-api:latest
+
+          docker build -t ghcr.io/${{ github.actor }}/patterns-core-api:latest -f Core.API/Dockerfile .
+          docker push ghcr.io/${{ github.actor }}/patterns-core-api:latest
+
+          docker build -t ghcr.io/${{ github.actor }}/patterns-account-api:latest -f Account.API/Dockerfile .
+          docker push ghcr.io/${{ github.actor }}/patterns-account-api:latest
+
+  deploy:
+    needs: build-and-push  # Запускается после загрузки образов
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Подключение к серверу и деплой
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: hitspatterns
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker login ghcr.io -u ${{ github.actor }} -p "${{ secrets.GHCR_TOKEN }}"
+
+            # Останавливаем и удаляем старые контейнеры (если они запущены)
+            docker stop patterns-loan-api || true
+            docker rm patterns-loan-api || true
+            
+            docker stop patterns-core-api || true
+            docker rm patterns-core-api || true
+
+            docker stop patterns-account-api || true
+            docker rm patterns-account-api || true
+            
+            # Загружаем новые версии образов
+            docker pull ghcr.io/${{ github.actor }}/patterns-loan-api:latest
+            docker pull ghcr.io/${{ github.actor }}/patterns-core-api:latest
+            docker pull ghcr.io/${{ github.actor }}/patterns-account-api:latest
+
+            # Запускаем контейнеры с новыми образами в сети mynetwork
+            docker run -d --name patterns-loan-api --network mynetwork -p 10010:8080 \
+              -v /var/log/patterns/loan:/app/logs --restart always \
+              --user 1001 ghcr.io/${{ github.actor }}/patterns-loan-api:latest
+
+            docker run -d --name patterns-core-api --network mynetwork -p 9010:8080 \
+              -v /var/log/patterns/core:/app/logs --restart always \
+              --user 1001 ghcr.io/${{ github.actor }}/patterns-core-api:latest
+
+            docker run -d --name patterns-account-api --network mynetwork -p 11010:8080 \
+              -v /var/log/patterns/account:/app/logs --restart always \
+              --user 1001 ghcr.io/${{ github.actor }}/patterns-account-api:latest
