@@ -3,7 +3,7 @@ name: Docker Compose CI/CD
 on:
   push:
     branches:
-      - main  # Запуск при пуше в main
+      - master
 
 jobs:
   build-and-push:
