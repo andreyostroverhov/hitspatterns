@@ -69,7 +69,32 @@ var app = builder.Build();
 
 await app.MigrateDbAsync();
 
-app.UseSwagger();
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+    {
+        string basePath = string.Empty;
+
+        if (app.Environment.IsProduction())
+        {
+            basePath = "/loan-component";
+            var forwardedHost = httpReq.Headers["X-Forwarded-Host"].FirstOrDefault() ?? httpReq.Host.Value;
+            var forwardedProto = httpReq.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? httpReq.Scheme;
+
+            swaggerDoc.Servers = new List<OpenApiServer>
+            {
+                new OpenApiServer { Url = $"{forwardedProto}://{forwardedHost}{basePath}" }
+            };
+        }
+        else
+        {
+            swaggerDoc.Servers = new List<OpenApiServer>
+            {
+                new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host}" }
+            };
+        }
+    });
+});
 
 app.UseSwaggerUI();
 app.UseErrorHandleMiddleware();
