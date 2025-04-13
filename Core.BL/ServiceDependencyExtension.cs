@@ -12,8 +12,13 @@ public static class ServiceDependencyExtension
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<CoreDbContext>(options =>
-        options.UseNpgsql(configuration.GetConnectionString("CoreDatabase")));
+                options.UseNpgsql(configuration.GetConnectionString("CoreDatabase")));
+
         services.AddScoped<ICoreService, CoreService>();
+        services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<RabbitMQProducer>();
+        services.AddHostedService<RabbitMQConsumer>();
+        services.AddHttpClient<Converter>();
 
         return services;
     }

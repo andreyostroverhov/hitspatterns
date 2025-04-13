@@ -9,6 +9,7 @@ using Core.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Common.Exceptions;
+using Core.Common.Enums;
 
 
 namespace Core.BL.Services
@@ -21,23 +22,26 @@ namespace Core.BL.Services
             _CoreDbContext = coreDbContext;
         }
 
-        public async Task<BADto> CreateBankAcc(Guid clientId) {
+        public async Task<BADto> CreateBankAcc(Guid clientId, Currency currency) {
             var bankAcc = new DAL.Entities.BankAccount
             {
                 ClientId = clientId,
+                Currency = currency,
                 Amount = 0,
                 CreatedAt = DateTime.UtcNow,
-                Status = Common.Enums.BankAccStatus.Open
+                Status = BankAccStatus.Open
             };
 
             _CoreDbContext.BankAccounts.Add(bankAcc);
             await _CoreDbContext.SaveChangesAsync();
 
-            AddRecord(Common.Enums.ChangeType.Create, bankAcc.Id);
+            //_Producer.SendMessage(ChangeType.Create, bankAcc.Id);
+            //AddRecord(Common.Enums.ChangeType.Create, bankAcc.Id);
 
             return new BADto
             {
                 Id = bankAcc.Id,
+                Currency = bankAcc.Currency,
                 Amount = bankAcc.Amount,
                 CreatedAt = bankAcc.CreatedAt,
                 Status = bankAcc.Status
@@ -54,111 +58,21 @@ namespace Core.BL.Services
                 throw new ServiceUnavailableException("You do not have access to this bank account.");
             }
 
-            bankAcc.Status = Common.Enums.BankAccStatus.Close;
+            bankAcc.Status = BankAccStatus.Close;
             _CoreDbContext.BankAccounts.UpdateRange(bankAcc);
             await _CoreDbContext.SaveChangesAsync();
 
-            AddRecord(Common.Enums.ChangeType.Close, bankAcc.Id);
+            //_Producer.SendMessage(ChangeType.Close, bankAcc.Id);
+            //AddRecord(Common.Enums.ChangeType.Close, bankAcc.Id);
 
             return new BADto
             {
                 Id = bankAcc.Id,
+                Currency = bankAcc.Currency,
                 Amount = bankAcc.Amount,
                 CreatedAt = bankAcc.CreatedAt,
                 Status = bankAcc.Status
             };
-        }
-
-        public async Task<BADto> ReplenishmentMoney(Guid Id, decimal Amount)
-        {
-            var bankAcc = await _CoreDbContext.BankAccounts
-                .FirstOrDefaultAsync(ba => ba.Id == Id) ?? throw new NotFoundException("Bank account not found.");
-
-            bankAcc.Amount = bankAcc.Amount + Amount;
-            _CoreDbContext.BankAccounts.UpdateRange(bankAcc);
-            await _CoreDbContext.SaveChangesAsync();
-
-            AddRecord(Common.Enums.ChangeType.Replenishment, bankAcc.Id); 
-
-            return new BADto
-            {
-                Id = bankAcc.Id,
-                Amount = bankAcc.Amount,
-                CreatedAt = bankAcc.CreatedAt,
-                Status = bankAcc.Status
-            };
-        }
-
-        public async Task<BADto> WithdrawMoney(Guid baId, Guid clientId, decimal Amount)
-        {
-            var bankAcc = await _CoreDbContext.BankAccounts
-                .FirstOrDefaultAsync(ba => ba.Id == baId) ?? throw new NotFoundException("Bank account not found.");
-
-            if (bankAcc.ClientId != clientId)
-            {
-                throw new ServiceUnavailableException("You do not have access to this bank account.");
-            }
-
-            if (bankAcc.Amount < Amount){
-                throw new ForbiddenException("Тot enough funds");
-            }
-
-            bankAcc.Amount = bankAcc.Amount - Amount;
-            _CoreDbContext.BankAccounts.UpdateRange(bankAcc);
-            await _CoreDbContext.SaveChangesAsync();
-
-            AddRecord(Common.Enums.ChangeType.Withdraw, bankAcc.Id);
-           
-            return new BADto
-            {
-                Id = bankAcc.Id,
-                Amount = bankAcc.Amount,
-                CreatedAt = bankAcc.CreatedAt,
-                Status = bankAcc.Status
-            };
-        }
-
-        public async Task<List<StoryDto>> BankAccStoryForClient(Guid baId, Guid clientId)
-        {
-            var bankAcc = await _CoreDbContext.BankAccounts
-               .FirstOrDefaultAsync(ba => ba.Id == baId) ?? throw new NotFoundException("Bank account not found.");
-
-            if (bankAcc.ClientId != clientId)
-            {
-                throw new ServiceUnavailableException("You do not have access to this bank account.");
-            }
-
-            var story = await _CoreDbContext.ChangeEvents
-                .AsNoTracking()
-                .Where(ce => ce.BankAccId == baId)
-                .Select(ce => new StoryDto
-                {
-                    Id = ce.Id,
-                    CreatedAt = ce.CreatedAt,
-                    Type = ce.Type
-                })
-                .ToListAsync();
-
-            return story;
-        }
-
-        public async Task<List<StoryDto>> BankAccStoryForEmployee(Guid baId)
-        {
-            var bankAcc = await _CoreDbContext.BankAccounts
-                .FirstOrDefaultAsync(ba => ba.Id == baId) ?? throw new NotFoundException("Bank account not found.");
-
-            var story = await _CoreDbContext.ChangeEvents
-               .AsNoTracking()
-               .Where(ce => ce.BankAccId == baId)
-               .Select(ce => new StoryDto
-               {
-                   Id = ce.Id,
-                   CreatedAt = ce.CreatedAt,
-                   Type = ce.Type
-               })
-               .ToListAsync();
-
-            return story;
         }
 
         public async Task<List<BADto>> GetAllBankAccs(Guid clientId)
@@ -180,7 +94,7 @@ namespace Core.BL.Services
 
        
 
-        private async void AddRecord(Common.Enums.ChangeType type, Guid baId)
+        /*private async void AddRecord(Common.Enums.ChangeType type, Guid baId)
         {
             var record = new DAL.Entities.ChangeEvent
             {
@@ -192,6 +106,6 @@ namespace Core.BL.Services
             _CoreDbContext.ChangeEvents.Add(record);
 
             await _CoreDbContext.SaveChangesAsync();
-        }
+        }*/
     }
 }

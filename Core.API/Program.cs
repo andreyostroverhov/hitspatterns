@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Common.Extensions;
 using Common.Middlewares;
 using Core.BL;
+using Core.BL.Hubs;
 using Core.BL.Services;
 using Core.Common.Interfaces;
 using Core.DAL;
@@ -62,6 +63,7 @@ builder.Services.AddSwaggerGen(option => {
 
 builder.Services.AddAuthorization();
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSignalR();
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -115,5 +117,6 @@ app.UseAuthorization();
 app.UseAuthentication();
 
 app.MapControllers();
+app.MapHub<HistoryHub>("/history");
 
 app.Run();

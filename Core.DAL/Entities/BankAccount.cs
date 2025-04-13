@@ -20,6 +20,8 @@ namespace Core.DAL.Entities
         [Range(0, double.MaxValue)]
         public decimal Amount { get; set; }
 
+        public Currency Currency { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public BankAccStatus Status { get; set; } = BankAccStatus.Open;

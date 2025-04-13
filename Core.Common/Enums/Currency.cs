@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.Common.Enums
 {
-    public enum ChangeType
+    public enum Currency
     {
-        Create,
-        Close,
-        Replenishment,
-        Withdraw,
-        TransferFrom,
-        TransferTo
+        RUB,
+        USD,
+        EUR
     }
 }
