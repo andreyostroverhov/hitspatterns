@@ -199,5 +199,40 @@ public class LoanClientService : ILoanClientService
             }).ToList()
         };
     }
+
+    public async Task<List<LoanScheduleDto>> GetOverduePayments(Guid clientId)
+    {
+        var loans = await _loanDbContext.Loans
+            .Where(l => l.ClientId == clientId)
+            .Select(l => l.Id)
+            .ToListAsync();
+
+        return await _loanDbContext.LoanSchedules
+            .Where(s => loans.Contains(s.LoanId))
+            .Where(s => s.PaymentDate < DateTime.UtcNow && s.Status == LoanStatus.Pending)
+            .Select(s => new LoanScheduleDto
+            {
+                Id = s.Id,
+                LoanId = s.LoanId,
+                PaymentDate = s.PaymentDate,
+                Amount = s.Amount,
+                Status = s.Status,
+                CreatedAt = s.CreatedAt
+            })
+            .ToListAsync();
+    }
+
+    public async Task<int> GetCreditRating(Guid clientId)
+    {
+        var overdueCount = await _loanDbContext.LoanSchedules
+            .Join(_loanDbContext.Loans,
+                s => s.LoanId,
+                l => l.Id,
+                (s, l) => new { s, l })
+            .Where(x => x.l.ClientId == clientId && x.s.Status == LoanStatus.Overdue)
+            .CountAsync();
+
+        return Math.Max(300, 800 - overdueCount * 50);
+    }
 }
 

@@ -15,14 +15,16 @@ namespace Loan.API.Controllers;
 public class LoanEmployeeController : ControllerBase
 {
     private readonly ILoanEmployeeService _loanEmployeeService;
+    private readonly ILoanClientService _loanClientService;
 
     /// <summary>
     /// Constructor
     /// </summary>
     /// <param name="loanEmployeeService"></param>
-    public LoanEmployeeController(ILoanEmployeeService loanEmployeeService)
+    public LoanEmployeeController(ILoanEmployeeService loanEmployeeService, ILoanClientService loanClientService)
     {
         _loanEmployeeService = loanEmployeeService;
+        _loanClientService = loanClientService;
     }
     /// <summary>
     /// Get available tariffs (Получить список всех тарифов)
@@ -78,4 +80,16 @@ public class LoanEmployeeController : ControllerBase
         return Ok(await _loanEmployeeService.GetLoanDetailsAsync(loanId));
     }
 
+
+    [HttpGet("clients/{clientId}/overdue-payments")]
+    public async Task<ActionResult<List<LoanScheduleDto>>> GetClientOverduePayments(Guid clientId)
+    {
+        return Ok(await _loanClientService.GetOverduePayments(clientId));
+    }
+
+    [HttpGet("clients/{clientId}/credit-rating")]
+    public async Task<ActionResult<int>> GetClientCreditRating(Guid clientId)
+    {
+        return Ok(await _loanClientService.GetCreditRating(clientId));
+    }
 }

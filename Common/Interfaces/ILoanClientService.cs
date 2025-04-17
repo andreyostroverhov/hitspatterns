@@ -10,4 +10,7 @@ public interface ILoanClientService
     Task<List<TariffDto>> GetAvailableTariffsForClient();
     Task<List<LoanDto>> GetLoansClient(Guid clientId);
     Task<LoanDetailsDto> GetLoanDetailsClient(Guid loanId);
+
+    Task<List<LoanScheduleDto>> GetOverduePayments(Guid clientId);
+    Task<int> GetCreditRating(Guid clientId);
 }

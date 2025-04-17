@@ -107,4 +107,28 @@ public class LoanClientController : ControllerBase
         var result = await _loanClientService.RepayLoanAsync(request);
         return Ok(result);
     }
+
+    [HttpGet("overdue-payments")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<ActionResult<List<LoanScheduleDto>>> GetOverduePayments()
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid clientId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        return Ok(await _loanClientService.GetOverduePayments(clientId));
+    }
+
+    [HttpGet("credit-rating")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<ActionResult<int>> GetCreditRating()
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid clientId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        return Ok(await _loanClientService.GetCreditRating(clientId));
+    }
 }
