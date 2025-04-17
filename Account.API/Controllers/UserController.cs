@@ -58,6 +58,41 @@ public class UserController : ControllerBase
         return Ok();
     }
 
+    /// <summary> 
+    /// Get user's settings
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("settings")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<ActionResult<UserSettings>> GetSettings()
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        return Ok(await _userService.GetSettings(userId));
+    }
+
+    /// <summary> 
+    /// Edit user's settings
+    /// </summary>
+    /// <returns></returns>
+    [HttpPut]
+    [Route("settings")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    public async Task<ActionResult> EditUserSettings(UserSettings userSettings)
+    {
+        if (User.Identity == null || Guid.TryParse(User.Identity.Name, out Guid userId) == false)
+        {
+            throw new UnauthorizedException("User is not authorized");
+        }
+
+        await _userService.EditUserSettings(userId, userSettings);
+        return Ok();
+    }
+
     /// <summary>
     /// Get users list [Admin]
     /// </summary>

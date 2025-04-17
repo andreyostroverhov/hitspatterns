@@ -7,6 +7,14 @@ namespace Account.DAL.Data.Entities;
 /// </summary>
 public class User : IdentityUser<Guid>
 {
+    public User()
+    {
+        UserSettings = new UserSettings
+        {
+            User = this 
+        };
+    }
+
     /// <summary>
     /// User`s full name
     /// </summary>
@@ -35,5 +43,10 @@ public class User : IdentityUser<Guid>
     /// User`s metadata
     /// </summary>
     public string? Metadata { get; set; }
+
+    /// <summary>
+    /// User`s settings
+    /// </summary>
+    public UserSettings UserSettings { get; set; }
 }
 

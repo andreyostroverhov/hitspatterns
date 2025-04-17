@@ -115,5 +115,33 @@ public class UserService : IUserService
 
         return shortUsers;
     }
+
+    public async Task<Common.DataTransferObjects.UserSettings> GetSettings(Guid userId)
+    {
+        var user = await _accountDbContext.Users
+            .Include(s => s.UserSettings)
+            .FirstOrDefaultAsync(u => u.Id == userId)
+            ?? throw new NotFoundException("User not found");
+
+        var settings = new Common.DataTransferObjects.UserSettings()
+        {
+            DarkMode = user.UserSettings.DarkMode
+        };
+
+        return settings;
+    }
+
+    public async Task EditUserSettings(Guid userId, Common.DataTransferObjects.UserSettings userSettings)
+    {
+        var user = await _accountDbContext.Users
+            .Include(s => s.UserSettings)
+            .FirstOrDefaultAsync(u => u.Id == userId)
+            ?? throw new NotFoundException("User not found");
+
+        user.UserSettings.DarkMode = userSettings.DarkMode;
+
+        _accountDbContext.UpdateRange(user);
+        await _accountDbContext.SaveChangesAsync();
+    }
 }
 

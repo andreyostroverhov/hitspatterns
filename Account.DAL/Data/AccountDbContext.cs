@@ -19,6 +19,7 @@ public class AccountDbContext : IdentityDbContext<User, Role, Guid, IdentityUser
     public override DbSet<Role> Roles { get; set; }
     public override DbSet<UserRole> UserRoles { get; set; }
     public DbSet<BirthDate> BirthDate { get; set; }
+    public DbSet<UserSettings> UserSettings { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,6 +28,11 @@ public class AccountDbContext : IdentityDbContext<User, Role, Guid, IdentityUser
         .HasOne(u => u.BirthDate)
             .WithOne(c => c.User)
             .HasForeignKey<BirthDate>();
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.UserSettings)
+            .WithOne(us => us.User)
+            .HasForeignKey<UserSettings>(us => us.UserId); 
 
         base.OnModelCreating(modelBuilder);
 
