@@ -28,5 +28,15 @@ public static class ServiceDependencyExtension
 
         return services;
     }
+
+    public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = config["Redis:ConnectionString"];
+            options.InstanceName = config["Redis:InstanceName"];
+        });
+        return services;
+    }
 }
 

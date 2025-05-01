@@ -21,6 +21,7 @@ builder.Services.AddCors(options => {
 // Add services to the container.
 
 builder.Services.AddUserBlServiceDependencies(builder.Configuration);
+builder.Services.AddRedisCache(builder.Configuration);
 builder.Services.AddIdentityManagers();
 
 builder.Services.AddControllers().AddJsonOptions(opts => {
@@ -102,6 +103,9 @@ app.UseSwagger(c =>
 });
 
 app.UseSwaggerUI();
+
+app.UseIdempotencyMiddleware();
+app.UseErrorSimulationMiddleware();
 app.UseErrorHandleMiddleware();
 
 app.UseHttpsRedirection();

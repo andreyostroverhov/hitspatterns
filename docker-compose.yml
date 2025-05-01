@@ -10,6 +10,9 @@ services:
     user: "1001"
     volumes:
       - /var/log/patterns/loan:/app/logs
+    depends_on:
+      - redis
+      - rabbitmq
 
   patterns-core-api:
     build:
@@ -21,6 +24,9 @@ services:
     user: "1001"
     volumes:
       - /var/log/patterns/core:/app/logs
+    depends_on:
+      - redis
+      - rabbitmq  
 
   patterns-account-api:
     build:
@@ -32,4 +38,30 @@ services:
     user: "1001"
     volumes:
       - /var/log/patterns/account:/app/logs
+    depends_on:
+      - redis
+      - rabbitmq
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    restart: always
+
+volumes:
+  redis_data:
+  rabbitmq_data: 

@@ -20,6 +20,7 @@ builder.Services.AddCors(options => {
 // Add services to the container.
 
 builder.Services.AddLoanServices(builder.Configuration);
+builder.Services.AddRedisCache(builder.Configuration);
 
 builder.Services.AddControllers().AddJsonOptions(opts => {
     var enumConverter = new JsonStringEnumConverter();
@@ -97,6 +98,9 @@ app.UseSwagger(c =>
 });
 
 app.UseSwaggerUI();
+
+app.UseIdempotencyMiddleware();
+app.UseErrorSimulationMiddleware();
 app.UseErrorHandleMiddleware();
 
 app.UseHttpsRedirection();
