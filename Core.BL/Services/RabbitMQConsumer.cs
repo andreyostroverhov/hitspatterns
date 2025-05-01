@@ -34,14 +34,14 @@ namespace Core.BL.Services
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
-                InitializeRabbitMQ();
+                await InitializeRabbitMQ();
                 StartConsuming(stoppingToken);
             }, stoppingToken);
         }
 
-        private async void InitializeRabbitMQ() 
+        private async Task InitializeRabbitMQ() 
         {
             var factory = new ConnectionFactory() { HostName = _hostName };
 
@@ -54,7 +54,7 @@ namespace Core.BL.Services
                                                autoDelete: false,
                                                arguments: null);
               
-               _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
+               await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
             }
         }
 
@@ -80,9 +80,10 @@ namespace Core.BL.Services
                 await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
             };
 
-            _channel.BasicConsumeAsync(queue: _queueName,
-                                       autoAck: false,
-                                       consumer: consumer);
+            _channel.BasicConsumeAsync(queue: _queueName, 
+                autoAck: false,
+                consumer: consumer,
+                cancellationToken: stoppingToken);
 
             // Ожидаем сигнала остановки
             while (!stoppingToken.IsCancellationRequested)
