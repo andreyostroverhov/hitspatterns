@@ -21,14 +21,23 @@ namespace Core.BL.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly string _hostName;
+        private readonly string _userName;
+        private readonly string _password;
         private readonly string _queueName;
         private IConnection _connection;
         private IChannel _channel;
 
-        public RabbitMQConsumer(IServiceProvider serviceProvider, string hostName = "localhost", string queueName = "bank_transactions")
+        public RabbitMQConsumer(
+            IServiceProvider serviceProvider,
+            string hostName = "rabbitmq",
+            string userName = "admin",
+            string password = "admin",
+            string queueName = "bank_transactions")
         {
             _serviceProvider = serviceProvider;
             _hostName = hostName;
+            _userName = userName;
+            _password = password;
             _queueName = queueName;
         }
 
@@ -43,7 +52,11 @@ namespace Core.BL.Services
 
         private async Task InitializeRabbitMQ() 
         {
-            var factory = new ConnectionFactory() { HostName = _hostName };
+            var factory = new ConnectionFactory() {
+                HostName = _hostName,
+                UserName = _userName,
+                Password = _password
+            };
 
             _connection = await factory.CreateConnectionAsync();
             _channel = await _connection.CreateChannelAsync();

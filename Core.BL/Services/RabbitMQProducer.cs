@@ -14,11 +14,19 @@ namespace Core.BL.Services
     public class RabbitMQProducer
     {
         private readonly string _hostName;
+        private readonly string _userName;
+        private readonly string _password;
         private readonly string _queueName;
 
-        public RabbitMQProducer(string hostName = "localhost", string queueName = "bank_transactions")
+        public RabbitMQProducer(
+            string hostName = "rabbitmq",
+            string userName = "admin",
+            string password = "admin",
+            string queueName = "bank_transactions")
         {
             _hostName = hostName;
+            _userName = userName;
+            _password = password;
             _queueName = queueName;
         }
 
@@ -67,7 +75,12 @@ namespace Core.BL.Services
         // Основной метод отправки
         private async void SendTransactionMessage(Transaction transaction)
         {
-            var factory = new ConnectionFactory() { HostName = _hostName };
+            var factory = new ConnectionFactory()
+            {
+                HostName = _hostName,
+                UserName = _userName,
+                Password = _password
+            };
 
             using (var connection = await factory.CreateConnectionAsync())
             using (var channel = await connection.CreateChannelAsync())

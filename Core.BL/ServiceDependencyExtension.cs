@@ -16,7 +16,13 @@ public static class ServiceDependencyExtension
 
         services.AddScoped<ICoreService, CoreService>();
         services.AddScoped<ITransactionService, TransactionService>();
-        services.AddScoped<RabbitMQProducer>();
+        services.AddSingleton<RabbitMQProducer>(provider =>
+            new RabbitMQProducer(
+                configuration["RabbitMQ:HostName"],
+                configuration["RabbitMQ:UserName"],
+                configuration["RabbitMQ:Password"],
+                configuration["RabbitMQ:QueueName"]
+            ));
         services.AddHostedService<RabbitMQConsumer>();
         services.AddHttpClient<Converter>();
 
