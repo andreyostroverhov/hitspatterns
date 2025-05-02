@@ -2,7 +2,10 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Common.Extensions;
 using Common.Middlewares;
+using Common.Monitoring;
 using Loan.BL.Extensions;
+using Loan.DAL.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -18,6 +21,11 @@ builder.Services.AddCors(options => {
 });
 
 // Add services to the container.
+builder.Services.AddDbContext<MonitoringDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("MonitoringDatabase"),
+        b => b.MigrationsAssembly("Common")
+    ));
 
 builder.Services.AddLoanServices(builder.Configuration);
 builder.Services.AddRedisCache(builder.Configuration);
@@ -70,35 +78,10 @@ var app = builder.Build();
 
 await app.MigrateDbAsync();
 
-app.UseSwagger(c =>
-{
-    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-    {
-        string basePath = string.Empty;
-
-        if (app.Environment.IsProduction())
-        {
-            basePath = "/loan-component";
-            var forwardedHost = httpReq.Headers["X-Forwarded-Host"].FirstOrDefault() ?? httpReq.Host.Value;
-            var forwardedProto = httpReq.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? httpReq.Scheme;
-
-            swaggerDoc.Servers = new List<OpenApiServer>
-            {
-                new OpenApiServer { Url = $"{forwardedProto}://{forwardedHost}{basePath}" }
-            };
-        }
-        else
-        {
-            swaggerDoc.Servers = new List<OpenApiServer>
-            {
-                new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host}" }
-            };
-        }
-    });
-});
+app.UseSwagger();
 
 app.UseSwaggerUI();
-
+app.UseTracingMiddleware();
 app.UseIdempotencyMiddleware();
 app.UseErrorSimulationMiddleware();
 app.UseErrorHandleMiddleware();

@@ -1,10 +1,12 @@
 ﻿using Common.Interfaces;
+using Common.Monitoring;
 using Core.BL.Services;
 using Core.Common.Interfaces;
 using Core.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Core.BL;
 public static class ServiceDependencyExtension
@@ -25,6 +27,20 @@ public static class ServiceDependencyExtension
             ));
         services.AddHostedService<RabbitMQConsumer>();
         services.AddHttpClient<Converter>();
+
+
+        services.AddHostedService<MonitoringEventConsumer>();
+        services.AddSingleton<IMonitoringPublisher>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<RabbitMQMonitoringPublisher>>();
+            return new RabbitMQMonitoringPublisher(
+                hostName: configuration["RabbitMQ:HostName"]!,
+                userName: configuration["RabbitMQ:UserName"]!,
+                password: configuration["RabbitMQ:Password"]!,
+                serviceName: "CoreService",
+                logger: logger
+            );
+        });
 
         return services;
     }

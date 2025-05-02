@@ -2,18 +2,12 @@
 using Core.Common.Interfaces;
 using Core.DAL;
 using Core.DAL.Entities;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Core.BL.Services
 {
@@ -25,7 +19,7 @@ namespace Core.BL.Services
         private readonly string _password;
         private readonly string _queueName;
         private IConnection _connection;
-        private IChannel _channel;
+        private IModel _channel;
 
         public RabbitMQConsumer(
             IServiceProvider serviceProvider,
@@ -43,74 +37,63 @@ namespace Core.BL.Services
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return Task.Run(async () =>
-            {
-                await InitializeRabbitMQ();
-                StartConsuming(stoppingToken);
-            }, stoppingToken);
+            InitializeRabbitMQ();
+            StartConsuming();
+            return Task.CompletedTask;
         }
 
-        private async Task InitializeRabbitMQ() 
+        private void InitializeRabbitMQ()
         {
-            var factory = new ConnectionFactory() {
+            var factory = new ConnectionFactory
+            {
                 HostName = _hostName,
                 UserName = _userName,
-                Password = _password
+                Password = _password,
+                DispatchConsumersAsync = true // Для асинхронных потребителей
             };
 
-            _connection = await factory.CreateConnectionAsync();
-            _channel = await _connection.CreateChannelAsync();
-            {
-               await _channel.QueueDeclareAsync(queue: _queueName,
-                                               durable: true,
-                                               exclusive: false,
-                                               autoDelete: false,
-                                               arguments: null);
-              
-               await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
-            }
+            _connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
+
+            _channel.QueueDeclare(
+                queue: _queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
+
+            _channel.BasicQos(0, 1, false);
         }
 
-        private void StartConsuming(CancellationToken stoppingToken) 
+        private void StartConsuming()
         {
             var consumer = new AsyncEventingBasicConsumer(_channel);
-            consumer.ReceivedAsync += async (model, ea) =>
+            consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-
                 var transaction = JsonSerializer.Deserialize<Transaction>(message);
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    // Получаем Scoped-сервис из Scope
                     var transactionService = scope.ServiceProvider.GetRequiredService<ITransactionService>();
-
-                    // Используем сервис
                     await transactionService.SaveTransactionToDatabase(transaction);
                 }
 
-                await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+                _channel.BasicAck(ea.DeliveryTag, false);
             };
 
-            _channel.BasicConsumeAsync(queue: _queueName, 
+            _channel.BasicConsume(
+                queue: _queueName,
                 autoAck: false,
-                consumer: consumer,
-                cancellationToken: stoppingToken);
-
-            // Ожидаем сигнала остановки
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                Task.Delay(1000, stoppingToken).Wait(stoppingToken);
-            }
+                consumer: consumer);
         }
 
-        public override async Task StopAsync(CancellationToken cancellationToken)
+        public override void Dispose()
         {
-            _channel?.CloseAsync();
-            _connection?.CloseAsync();
-
-            await base.StopAsync(cancellationToken);
+            _channel?.Close();
+            _connection?.Close();
+            base.Dispose();
         }
     }
 }

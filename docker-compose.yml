@@ -1,4 +1,3 @@
-version: '3'
 services:
   patterns-loan-api:
     build:
@@ -42,6 +41,20 @@ services:
       - redis
       - rabbitmq
 
+  patterns-monitoring-api:
+    build:
+      context: .
+      dockerfile: Monitoring.API/Dockerfile
+    ports:
+      - "13010:8080"
+    restart: always
+    user: "1001"
+    volumes:
+      - /var/log/patterns/monitoring:/app/logs
+    depends_on:
+      - redis
+      - rabbitmq
+
   redis:
     image: redis:alpine
     ports:
@@ -64,4 +77,4 @@ services:
 
 volumes:
   redis_data:
-  rabbitmq_data: 
+  rabbitmq_data:
