@@ -1,5 +1,6 @@
 ﻿using Common.Interfaces;
 using Common.Monitoring;
+using Common.Policies;
 using Loan.BL.Services;
 using Loan.DAL.Data;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,11 @@ public static class ServiceDependencyExtension
                 logger: logger
             );
         });
+
+        services.AddHttpClient<CoreService>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))  // Sample: default lifetime is 2 minutes
+            .AddPolicyHandler(HttpClientPolicies.GetRetryPolicy())
+            .AddPolicyHandler(HttpClientPolicies.GetCircuitBreakerPolicy()); ;
 
 
         return services;
