@@ -1,5 +1,6 @@
 ﻿using Common.Interfaces;
 using Common.Monitoring;
+using Common.Policies;
 using Core.BL.Services;
 using Core.Common.Interfaces;
 using Core.DAL;
@@ -7,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Polly.Extensions.Http;
+using Polly;
 
 namespace Core.BL;
 public static class ServiceDependencyExtension
@@ -18,6 +21,7 @@ public static class ServiceDependencyExtension
 
         services.AddScoped<ICoreService, CoreService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        
         services.AddSingleton<RabbitMQProducer>(provider =>
             new RabbitMQProducer(
                 configuration["RabbitMQ:HostName"],
@@ -26,7 +30,11 @@ public static class ServiceDependencyExtension
                 configuration["RabbitMQ:QueueName"]
             ));
         services.AddHostedService<RabbitMQConsumer>();
-        services.AddHttpClient<Converter>();
+
+        services.AddHttpClient<Converter>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))  // Sample: default lifetime is 2 minutes
+            .AddPolicyHandler(HttpClientPolicies.GetRetryPolicy())
+            .AddPolicyHandler(HttpClientPolicies.GetCircuitBreakerPolicy());
 
 
         services.AddHostedService<MonitoringEventConsumer>();
@@ -42,16 +50,6 @@ public static class ServiceDependencyExtension
             );
         });
 
-        return services;
-    }
-
-    public static IServiceCollection AddRedisCache(this IServiceCollection services, IConfiguration config)
-    {
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = config["Redis:ConnectionString"];
-            options.InstanceName = config["Redis:InstanceName"];
-        });
         return services;
     }
 }
