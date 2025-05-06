@@ -35,5 +35,7 @@ public class User : IdentityUser<Guid>
     /// User`s metadata
     /// </summary>
     public string? Metadata { get; set; }
+
+    public string? DeviceToken { get; set; }
 }
 

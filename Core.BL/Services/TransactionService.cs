@@ -5,12 +5,14 @@ using Core.Common.Enums;
 using Core.Common.Interfaces;
 using Core.DAL;
 using Core.DAL.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,12 +23,16 @@ namespace Core.BL.Services
 
         private readonly CoreDbContext _CoreDbContext;
         private readonly Converter _Converter;
+        private readonly FirebaseService _Firebase;
+        private readonly UserServise _userService;
         private readonly RabbitMQProducer _Producer;
         private readonly IHubContext<HistoryHub> _hubContext;
-        public TransactionService(CoreDbContext coreDbContext, Converter converter, RabbitMQProducer producer, IHubContext<HistoryHub> hubContext)
+        public TransactionService(CoreDbContext coreDbContext, Converter converter, FirebaseService firebaseService, UserServise userServise, RabbitMQProducer producer, IHubContext<HistoryHub> hubContext)
         {
             _CoreDbContext = coreDbContext;
             _Converter = converter;
+            _Firebase = firebaseService;
+            _userService = userServise;
             _Producer = producer;
             _hubContext = hubContext;
         }
@@ -166,6 +172,16 @@ namespace Core.BL.Services
             await _CoreDbContext.SaveChangesAsync();
 
             Update(transaction.AccountId);
+
+           if (transaction.Type == ChangeType.TransferFrom)
+            {
+                var managerId = new Guid("7557e9e3 - 1422 - 4b3e - b274 - 2351a2b9460d");
+
+                var userDT = await _userService.GetDeviceToken(transaction.RelatedAccountId);
+                var managerDT = await _userService.GetDeviceToken(managerId);
+                var tokens = new List<string> { userDT, managerDT };
+                await _Firebase.SendPushNotification(tokens, transaction);
+            }
         }
 
         private async void Update(Guid accountId) 

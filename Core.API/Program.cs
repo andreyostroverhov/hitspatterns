@@ -34,7 +34,7 @@ builder.Services.AddDbContext<MonitoringDbContext>(options =>
 
 
 builder.Services.AddCoreServices(builder.Configuration);
-builder.Services.AddRedisCache(builder.Configuration);
+//builder.Services.AddRedisCache(builder.Configuration);
 
 builder.Services.AddControllers().AddJsonOptions(opts => {
     var enumConverter = new JsonStringEnumConverter();

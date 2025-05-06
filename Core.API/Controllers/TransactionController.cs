@@ -12,10 +12,12 @@ namespace Core.API.Controllers;
 public class TransactionController : ControllerBase
 {
     private readonly ITransactionService _TransactionService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public TransactionController(ITransactionService transactionService)
+    public TransactionController(ITransactionService transactionService, IHttpContextAccessor httpContextAccessor)
     {
         _TransactionService = transactionService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpPost]

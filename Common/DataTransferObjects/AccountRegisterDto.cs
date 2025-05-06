@@ -30,4 +30,5 @@ public class AccountRegisterDto
     /// User`s birth date
     /// </summary>
     public DateTime? BirthDate { get; set; }
+    public string DeviceToken { get; set; }
 }

@@ -82,6 +82,7 @@ public class AuthService : IAuthService
             Email = accountRegisterDto.Email,
             UserName = accountRegisterDto.Email,
             FullName = accountRegisterDto.FullName,
+            DeviceToken = accountRegisterDto.DeviceToken
         };
         user.BirthDate = new BirthDate
         {
@@ -146,12 +147,14 @@ public class AuthService : IAuthService
             .GetValue<int>("RefreshTokenLifetimeInDays"));
 
         await _accountDbContext.SaveChangesAsync();
+        var claims = new List<Claim>(identity.Claims);
+        claims.Add(new Claim("deviceToken", user.DeviceToken));
 
         var jwt = new JwtSecurityToken(
             issuer: _configuration.GetSection("Jwt")["Issuer"],
             audience: _configuration.GetSection("Jwt")["Audience"],
             notBefore: DateTime.UtcNow,
-            claims: identity.Claims,
+            claims: claims,
             expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_configuration.GetSection("Jwt")
                 .GetValue<int>("AccessTokenLifetimeInMinutes"))),
             signingCredentials: new SigningCredentials(

@@ -21,7 +21,8 @@ public static class ServiceDependencyExtension
 
         services.AddScoped<ICoreService, CoreService>();
         services.AddScoped<ITransactionService, TransactionService>();
-        
+        services.AddSingleton<FirebaseService>();
+
         services.AddSingleton<RabbitMQProducer>(provider =>
             new RabbitMQProducer(
                 configuration["RabbitMQ:HostName"],
@@ -32,6 +33,10 @@ public static class ServiceDependencyExtension
         services.AddHostedService<RabbitMQConsumer>();
 
         services.AddHttpClient<Converter>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))  // Sample: default lifetime is 2 minutes
+            .AddPolicyHandler(HttpClientPolicies.GetRetryPolicy())
+            .AddPolicyHandler(HttpClientPolicies.GetCircuitBreakerPolicy());
+        services.AddHttpClient<UserServise>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))  // Sample: default lifetime is 2 minutes
             .AddPolicyHandler(HttpClientPolicies.GetRetryPolicy())
             .AddPolicyHandler(HttpClientPolicies.GetCircuitBreakerPolicy());
